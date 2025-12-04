@@ -111,6 +111,35 @@ models_data = {
         "OpenAI", "OpenAI", "OpenAI", "OpenAI", "OpenAI", "OpenAI", "OpenAI", "OpenAI",
         "OpenAI", "OpenAI", "OpenAI", "EleutherAI", "EleutherAI", "EleutherAI",
         "TII", "TII", "TII", "Meta", "Meta", "Meta", "Mistral", "Mistral"
+    ],
+    "Open Source": [
+        "❌ No", "❌ No", "❌ No", "❌ No", "❌ No", "❌ No", "❌ No", "❌ No",
+        "❌ No", "❌ No", "❌ No", "❌ No", "❌ No", "❌ No", "✅ Yes", "✅ Yes",
+        "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes",
+        "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes", "✅ Yes"
+    ],
+    "Access Method": [
+        "API Only", "API Only", "API Only", "API Only", "API Only", "API Only", "API Only", "API Only",
+        "API Only", "API Only", "API Only", "API Only", "API Only", "API Only", 
+        "Hugging Face", "Hugging Face", "Hugging Face", "Hugging Face", "GitHub",
+        "Hugging Face", "Hugging Face", "Hugging Face", "Hugging Face", "Hugging Face", "Hugging Face",
+        "Meta / Hugging Face", "Meta / Hugging Face", "Meta / Hugging Face", "Hugging Face / Mistral AI", "Hugging Face / Mistral AI"
+    ],
+    "License": [
+        "Proprietary", "Proprietary", "Proprietary", "Proprietary", "Proprietary", "Proprietary", "Proprietary", "Proprietary",
+        "Proprietary", "Proprietary", "Proprietary", "Proprietary", "Proprietary", "Proprietary",
+        "MIT", "MIT", "MIT", "MIT", "MIT", "Apache 2.0", "Apache 2.0", "Apache 2.0",
+        "Apache 2.0", "Apache 2.0", "Apache 2.0", "Meta (Commercial Use OK)", "Meta (Commercial Use OK)", "Meta (Commercial Use OK)",
+        "Apache 2.0", "Apache 2.0"
+    ],
+    "Deployment Options": [
+        "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API",
+        "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API", "OpenAI API",
+        "Local / Cloud", "Local / Cloud", "Local / Cloud", "Local / Cloud", "Local / Cloud",
+        "Local / Cloud / HF", "Local / Cloud / HF", "Local / Cloud / HF", 
+        "Local / Cloud / HF", "Local / Cloud / HF", "Local / Cloud / HF",
+        "Local / Cloud / Replicate", "Local / Cloud / Replicate", "Local / Cloud / Replicate",
+        "Local / Cloud / HF", "Local / Cloud / HF"
     ]
 }
 
@@ -165,7 +194,7 @@ filtered_df = df[
 ]
 
 # Display tabs
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Comparison Table", "📈 Visualizations", "🎯 Specifications", "⚙️ Hardware Requirements"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Comparison Table", "📈 Visualizations", "🎯 Specifications", "⚙️ Hardware Requirements", "🔓 Open Source Info"])
 
 # Tab 1: Comparison Table
 with tab1:
@@ -362,6 +391,179 @@ with tab4:
         color_continuous_scale="RdYlGn_r"
     )
     st.plotly_chart(power_fig, use_container_width=True)
+
+# Tab 5: Open Source Information
+with tab5:
+    st.subheader("Open Source Models Information")
+    
+    # Filter to show only open source models
+    open_source_df = filtered_df[filtered_df["Open Source"] == "✅ Yes"].copy()
+    
+    if len(open_source_df) > 0:
+        # Summary statistics
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Open Source Models", len(open_source_df))
+        with col2:
+            st.metric("Avg Parameters", f"{open_source_df['Parameters (Billions)'].mean():.1f}B")
+        with col3:
+            st.metric("Avg Memory", f"{open_source_df['Memory (GB)'].mean():.0f} GB")
+        with col4:
+            st.metric("Providers", open_source_df["Provider"].nunique())
+        
+        st.markdown("---")
+        
+        # Open Source Model Details
+        st.markdown("### Detailed Open Source Model Information")
+        
+        for idx, row in open_source_df.iterrows():
+            with st.expander(f"📖 {row['Model']} - {row['Provider']}", expanded=(idx == open_source_df.index[0])):
+                col1, col2 = st.columns([1, 1])
+                
+                with col1:
+                    st.markdown(f"**License:** {row['License']}")
+                    st.markdown(f"**Open Source:** {row['Open Source']}")
+                    st.markdown(f"**Provider:** {row['Provider']}")
+                    st.markdown(f"**Release Date:** {row['Release Date']}")
+                    st.markdown(f"**Parameters:** {row['Parameters (Billions)']:.1f}B")
+                
+                with col2:
+                    st.markdown(f"**Access Method:** {row['Access Method']}")
+                    st.markdown(f"**Deployment Options:** {row['Deployment Options']}")
+                    st.markdown(f"**Memory Required:** {row['Memory (GB)']:.0f} GB")
+                    st.markdown(f"**GPU Memory:** {row['GPU Memory (GB)']:.0f} GB")
+                    st.markdown(f"**Context Window:** {row['Context Window']:,}")
+                
+                # Access and usage instructions
+                st.markdown("#### 🔗 How to Access & Use")
+                
+                if "Hugging Face" in row['Access Method']:
+                    st.markdown("""
+                    **Via Hugging Face:**
+                    1. Visit [Hugging Face Model Hub](https://huggingface.co/models)
+                    2. Search for the model name
+                    3. Download model weights or use via API
+                    ```python
+                    from transformers import AutoTokenizer, AutoModelForCausalLM
+                    tokenizer = AutoTokenizer.from_pretrained("model-name")
+                    model = AutoModelForCausalLM.from_pretrained("model-name")
+                    ```
+                    """)
+                
+                if row['Provider'] == "Meta":
+                    st.markdown("""
+                    **Via Meta:**
+                    1. Visit [Meta's LLaMA GitHub](https://github.com/facebookresearch/llama)
+                    2. Request access or download directly
+                    3. Follow setup instructions in repository
+                    ```bash
+                    git clone https://github.com/facebookresearch/llama.git
+                    ```
+                    """)
+                
+                if row['Provider'] == "Mistral":
+                    st.markdown("""
+                    **Via Mistral AI:**
+                    1. Visit [Mistral AI](https://mistral.ai/)
+                    2. Download models from their platform or Hugging Face
+                    3. Use with vLLM or Ollama for local inference
+                    ```bash
+                    ollama run mistral
+                    ```
+                    """)
+                
+                if row['Provider'] == "TII":
+                    st.markdown("""
+                    **Via Hugging Face (TII Models):**
+                    1. Search "Falcon" on [Hugging Face](https://huggingface.co/models)
+                    2. Commercial use permitted under Apache 2.0
+                    3. Deploy with vLLM, LM Studio, or Ollama
+                    """)
+                
+                if row['Provider'] == "EleutherAI":
+                    st.markdown("""
+                    **Via Hugging Face (EleutherAI):**
+                    1. Find EleutherAI models on Hugging Face
+                    2. Download weights or use transformers library
+                    3. MIT license - fully open source
+                    """)
+                
+                if "GitHub" in row['Access Method']:
+                    st.markdown("""
+                    **Via GitHub:**
+                    1. Clone repository
+                    2. Install dependencies
+                    3. Download model weights
+                    """)
+                
+                # Common deployment platforms
+                st.markdown("#### 🚀 Recommended Deployment Platforms")
+                
+                deployment_info = {
+                    "Local": "Run on your own hardware using Ollama, LM Studio, or vLLM",
+                    "Hugging Face Spaces": "Free GPU inference at huggingface.co/spaces",
+                    "Replicate": "Pay-per-use API service with automatic scaling",
+                    "Together AI": "Shared GPU cluster for cost-effective inference",
+                    "Modal": "Run serverless GPU workloads",
+                    "RunwayML": "Web-based interface for model inference"
+                }
+                
+                for platform, desc in deployment_info.items():
+                    st.write(f"• **{platform}**: {desc}")
+                
+                # Cost comparison
+                st.markdown("#### 💰 Cost Information")
+                st.info("""
+                **Open Source Advantages:**
+                - ✅ No API costs for local deployment
+                - ✅ No rate limits
+                - ✅ Full model customization
+                - ✅ Data privacy (runs locally)
+                - ⚠️ Requires GPU hardware investment
+                """)
+    else:
+        st.warning("No open source models in current filters. Adjust filters to see open source options.")
+    
+    st.markdown("---")
+    
+    # Open Source Model Comparison Table
+    st.subheader("Open Source vs Proprietary Comparison")
+    
+    comparison_data = {
+        "Aspect": [
+            "Cost (Inference)",
+            "Model Customization",
+            "Data Privacy",
+            "Rate Limits",
+            "Infrastructure",
+            "Support",
+            "Commercial Use",
+            "Latency Control"
+        ],
+        "Open Source": [
+            "Free (local) or pay-per-use",
+            "Full - retrain/fine-tune",
+            "Complete - runs locally",
+            "None - self-hosted",
+            "Own GPU hardware needed",
+            "Community support",
+            "Usually allowed (check license)",
+            "Full control"
+        ],
+        "Proprietary (OpenAI)": [
+            "Pay-per-token usage",
+            "Limited to prompting",
+            "Data sent to servers",
+            "API rate limits apply",
+            "OpenAI's infrastructure",
+            "Professional support available",
+            "Allowed per terms",
+            "OpenAI controls"
+        ]
+    }
+    
+    comparison_df = pd.DataFrame(comparison_data)
+    st.dataframe(comparison_df, use_container_width=True, hide_index=True)
 
 # Footer
 st.markdown("---")

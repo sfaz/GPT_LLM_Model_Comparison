@@ -51,3 +51,7 @@ htmlcov/
 
 # Logs
 *.log
+
+# Untitled files
+Untitled-*.txt
+Untitled-*.md
